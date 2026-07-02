@@ -8,7 +8,8 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 
 object NetworkModule {
-    private const val BASE_URL = "https://api.pexels.com/"
+    private const val WALLHAVEN_BASE_URL = "https://wallhaven.cc/api/"
+    private const val REDDIT_BASE_URL = "https://www.reddit.com/"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -20,15 +21,27 @@ object NetworkModule {
         .addInterceptor(loggingInterceptor)
         .build()
 
-    val retrofit: Retrofit by lazy {
+    private val wallhavenRetrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(WALLHAVEN_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
 
-    val pexelsApi: PexelsApi by lazy {
-        retrofit.create(PexelsApi::class.java)
+    private val redditRetrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(REDDIT_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    val wallhavenApi: WallhavenApi by lazy {
+        wallhavenRetrofit.create(WallhavenApi::class.java)
+    }
+
+    val redditApi: RedditApi by lazy {
+        redditRetrofit.create(RedditApi::class.java)
     }
 }
