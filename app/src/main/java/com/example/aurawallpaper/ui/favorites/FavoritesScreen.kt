@@ -100,10 +100,10 @@ fun FavoritesScreen(
                     AsyncImage(
                         model = photo.src.large,
                         contentDescription = photo.alt,
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.FillWidth,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height((200..300).random().dp)
+                            .wrapContentHeight()
                             .clip(RoundedCornerShape(12.dp))
                             .clickable { onWallpaperClick(photo) }
                     )

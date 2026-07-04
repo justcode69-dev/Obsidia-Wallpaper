@@ -7,11 +7,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +34,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import coil.compose.AsyncImage
 import com.example.aurawallpaper.data.model.Photo
 import com.example.aurawallpaper.ui.home.FeedMode
@@ -58,12 +67,7 @@ fun HomeDiscoveryScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Aura Gallery", style = MaterialTheme.typography.headlineMedium) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.8f)
-                )
-            )
+            // Remove the default app bar, Zedge doesn't have one, just a search bar at the top of the body
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -71,10 +75,11 @@ fun HomeDiscoveryScreen(
             OutlinedTextField(
                 value = textSearch,
                 onValueChange = { textSearch = it },
-                placeholder = { Text("Search wallpapers...") },
+                placeholder = { Text("Search Aura...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(16.dp),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = {
@@ -83,40 +88,21 @@ fun HomeDiscoveryScreen(
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 )
             )
 
-            // Category Chips
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 8.dp)
+            // Quick Actions
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                items(categories) { category ->
-                    FilterChip(
-                        selected = selectedCategory == category,
-                        onClick = { viewModel.selectCategory(category) },
-                        label = { Text(category) }
-                    )
-                }
-            }
-
-            // Tabs for Popular / Newest
-            TabRow(
-                selectedTabIndex = if (feedMode == FeedMode.POPULAR) 0 else 1,
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-                Tab(
-                    selected = feedMode == FeedMode.POPULAR,
-                    onClick = { viewModel.setFeedMode(FeedMode.POPULAR) },
-                    text = { Text("Popular") }
-                )
-                Tab(
-                    selected = feedMode == FeedMode.NEWEST,
-                    onClick = { viewModel.setFeedMode(FeedMode.NEWEST) },
-                    text = { Text("Newest") }
-                )
+                QuickActionIcon(icon = Icons.Default.Star, label = "Popular", selected = feedMode == FeedMode.POPULAR, onClick = { viewModel.setFeedMode(FeedMode.POPULAR) }, color = Color(0xFF9C27B0))
+                QuickActionIcon(icon = Icons.Default.AutoAwesome, label = "Newest", selected = feedMode == FeedMode.NEWEST, onClick = { viewModel.setFeedMode(FeedMode.NEWEST) }, color = Color(0xFFE91E63))
+                QuickActionIcon(icon = Icons.Default.Category, label = "Categories", selected = false, onClick = { viewModel.selectCategory("Random") }, color = Color(0xFF4CAF50))
+                QuickActionIcon(icon = Icons.Default.WorkspacePremium, label = "Premium", selected = false, onClick = { }, color = Color(0xFFFFC107))
             }
 
             // Grid Content
@@ -134,12 +120,47 @@ fun HomeDiscoveryScreen(
                     )
                 } else {
                     LazyVerticalStaggeredGrid(
-                        columns = StaggeredGridCells.Fixed(2),
+                        columns = StaggeredGridCells.Fixed(3), // 3 columns like Zedge
                         contentPadding = PaddingValues(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalItemSpacing = 12.dp,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalItemSpacing = 8.dp,
                         modifier = Modifier.fillMaxSize()
                     ) {
+                        item(span = StaggeredGridItemSpan.FullLine) {
+                            Column {
+                                Text(
+                                    "Featured",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+                                )
+                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    items(wallpapers.take(4)) { photo ->
+                                        FeaturedCard(photo, onClick = { onWallpaperClick(photo) })
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    "Popular Collections",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+                                )
+                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    items(wallpapers.drop(4).take(5)) { photo ->
+                                        CollectionCard(photo, onClick = { onWallpaperClick(photo) })
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    "Popular",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+                                )
+                            }
+                        }
+
                         items(wallpapers.size) { index ->
                             if (index == wallpapers.lastIndex) {
                                 LaunchedEffect(index) {
@@ -153,7 +174,6 @@ fun HomeDiscoveryScreen(
                         }
                     }
 
-                    // Loading indicator for pagination
                     if (isLoading && wallpapers.isNotEmpty()) {
                         CircularProgressIndicator(
                             modifier = Modifier
@@ -169,20 +189,91 @@ fun HomeDiscoveryScreen(
 }
 
 @Composable
-fun WallpaperCard(photo: Photo, onClick: () -> Unit) {
+fun QuickActionIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, selected: Boolean, onClick: () -> Unit, color: androidx.compose.ui.graphics.Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onClick() }) {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(if (selected) color.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant)
+                .padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(28.dp))
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+fun FeaturedCard(photo: Photo, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            // approximate height based on photo ratio
-            .height((200 + (photo.height.toFloat() / photo.width.toFloat() * 100)).dp)
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
+            .width(260.dp)
+            .height(140.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() }
+    ) {
+        AsyncImage(
+            model = photo.src.large,
+            contentDescription = photo.alt,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))))
+                .padding(12.dp)
+        ) {
+            Text(photo.alt.takeIf { it.isNotBlank() } ?: "Featured", color = Color.White, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+fun CollectionCard(photo: Photo, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(120.dp)
+            .height(180.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
     ) {
         AsyncImage(
             model = photo.src.medium,
             contentDescription = photo.alt,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))))
+                .padding(8.dp)
+        ) {
+            Text(photo.photographer, color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+@Composable
+fun WallpaperCard(photo: Photo, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+    ) {
+        AsyncImage(
+            model = photo.src.medium,
+            contentDescription = photo.alt,
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier.fillMaxWidth().wrapContentHeight()
         )
         // Subtle gradient overlay for metadata can be added here
         Box(

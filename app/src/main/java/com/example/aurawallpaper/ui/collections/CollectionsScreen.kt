@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -104,17 +107,18 @@ fun CollectionsScreen(onWallpaperClick: (Photo) -> Unit) {
                     Text("No wallpapers in this collection.")
                 }
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(4.dp)
+                    contentPadding = PaddingValues(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalItemSpacing = 4.dp
                 ) {
                     items(collectionWallpapers) { cw ->
                         Card(
                             modifier = Modifier
-                                .padding(4.dp)
                                 .fillMaxWidth()
-                                .aspectRatio(0.6f)
+                                .wrapContentHeight()
                                 .clickable {
                                     onWallpaperClick(
                                         Photo(
@@ -125,6 +129,7 @@ fun CollectionsScreen(onWallpaperClick: (Photo) -> Unit) {
                                             photographer = cw.photographer,
                                             photographerUrl = "",
                                             photographerId = 0,
+                                            avgColor = null,
                                             src = PhotoSource(
                                                 original = cw.url,
                                                 large2x = cw.url,
@@ -147,8 +152,8 @@ fun CollectionsScreen(onWallpaperClick: (Photo) -> Unit) {
                                     .crossfade(true)
                                     .build(),
                                 contentDescription = cw.alt,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
+                                contentScale = ContentScale.FillWidth,
+                                modifier = Modifier.fillMaxWidth().wrapContentHeight()
                             )
                         }
                     }
