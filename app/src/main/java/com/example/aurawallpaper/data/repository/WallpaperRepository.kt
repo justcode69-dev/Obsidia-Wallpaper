@@ -17,7 +17,7 @@ class WallpaperRepository(val dao: com.example.aurawallpaper.data.local.Wallpape
                 // Reddit pagination by page number is not directly supported without an 'after' token,
                 // but we can fetch new batches of hot occasionally or just randomize.
                 // For simplicity, we just fetch a popular wallpaper subreddit.
-                val redditDeferred = async { redditApi.getSubredditHot("Amoledbackgrounds", limit = 30) }
+                val redditDeferred = async { redditApi.getSubredditHot("Amoledbackgrounds", limit = 50) }
 
                 val photos = mutableListOf<Photo>()
                 
@@ -91,7 +91,7 @@ class WallpaperRepository(val dao: com.example.aurawallpaper.data.local.Wallpape
         return try {
             supervisorScope {
                 val wallhavenDeferred = async { wallhavenApi.searchWallpapers(query = query, page = page) }
-                val redditDeferred = async { redditApi.searchSubreddit("MobileWallpaper", query = query, limit = 30) }
+                val redditDeferred = async { redditApi.searchSubreddit("MobileWallpaper", query = query, limit = 50) }
 
                 val photos = mutableListOf<Photo>()
                 

@@ -54,7 +54,7 @@ fun HomeDiscoveryScreen(
         }
     }
 
-    val categories = listOf("Amoled", "Anime", "Digital Art", "Cyberpunk", "Minimalist", "Space", "Abstract", "Fantasy")
+    val categories = listOf("Amoled", "Anime", "Digital Art", "Cyberpunk", "Minimalist", "Space", "Abstract", "Fantasy", "Landscape", "Architecture", "Cars", "Animals", "Neon", "Gaming", "Vaporwave", "Photography")
 
     Scaffold(
         topBar = {
