@@ -120,7 +120,7 @@ fun HomeDiscoveryScreen(
                     )
                 } else {
                     LazyVerticalStaggeredGrid(
-                        columns = StaggeredGridCells.Fixed(3), // 3 columns like Zedge
+                        columns = StaggeredGridCells.Fixed(2), // 2 columns like Pinterest
                         contentPadding = PaddingValues(12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalItemSpacing = 8.dp,
@@ -275,20 +275,5 @@ fun WallpaperCard(photo: Photo, onClick: () -> Unit) {
             contentScale = ContentScale.FillWidth,
             modifier = Modifier.fillMaxWidth().wrapContentHeight()
         )
-        // Subtle gradient overlay for metadata can be added here
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                .padding(8.dp)
-        ) {
-            Text(
-                text = photo.photographer,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold
-            )
-        }
     }
 }
