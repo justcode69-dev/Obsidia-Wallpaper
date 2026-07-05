@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 val categories = listOf(
-    "Trending", "Recent", "Animals", "Anime", "Bollywood", "Logos", 
+    "Animals", "Anime", "Bollywood", "Logos", 
     "Cars & Vehicles", "Designs", "Drawings", "Entertainment", "Funny", 
     "Games", "Holidays", "Love", "Music", "Nature", "News & Politics", 
     "Other", "Patterns", "Sayings", "Spiritual", "Sport", "Technology", 

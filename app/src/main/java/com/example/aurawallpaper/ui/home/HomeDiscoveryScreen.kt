@@ -26,6 +26,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +66,22 @@ fun HomeDiscoveryScreen(
     }
 
     val categories = listOf("Amoled", "Anime", "Digital Art", "Cyberpunk", "Minimalist", "Space", "Abstract", "Fantasy", "Landscape", "Architecture", "Cars", "Animals", "Neon", "Gaming", "Vaporwave", "Photography")
+
+    val listState = rememberLazyStaggeredGridState()
+
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val totalItems = listState.layoutInfo.totalItemsCount
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            totalItems > 0 && lastVisibleItem >= totalItems - 5
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore && !isLoading) {
+            viewModel.loadNextPage()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -119,8 +137,11 @@ fun HomeDiscoveryScreen(
                         modifier = Modifier.align(Alignment.Center).padding(16.dp)
                     )
                 } else {
+                    val gridWallpapers = if (wallpapers.size > 9) wallpapers.drop(9) else emptyList()
+
                     LazyVerticalStaggeredGrid(
                         columns = StaggeredGridCells.Fixed(2), // 2 columns like Pinterest
+                        state = listState,
                         contentPadding = PaddingValues(12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalItemSpacing = 8.dp,
@@ -161,15 +182,10 @@ fun HomeDiscoveryScreen(
                             }
                         }
 
-                        items(wallpapers.size) { index ->
-                            if (index == wallpapers.lastIndex) {
-                                LaunchedEffect(index) {
-                                    viewModel.loadNextPage()
-                                }
-                            }
+                        items(gridWallpapers.size) { index ->
                             WallpaperCard(
-                                photo = wallpapers[index],
-                                onClick = { onWallpaperClick(wallpapers[index]) }
+                                photo = gridWallpapers[index],
+                                onClick = { onWallpaperClick(gridWallpapers[index]) }
                             )
                         }
                     }
